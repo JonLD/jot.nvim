@@ -41,14 +41,16 @@ require("jot").open_note("my note title")
     "JonLD/jot.nvim",
     opts = {
         -- Optional configuration
-        jot_cmd = "jot.exe",  -- Path to jot executable
+        jot_cmd = "jot.exe",  -- Optional path to jot executable
     }
     keys = {
-        "<leader>j",
-        function()
-            require("jot").branch()
-        end,
-        desc = "Open branch note"
+        {
+            "<leader>j",
+            function ()
+                require("jot").open_branch_note()
+            end,
+            desc = "Open Branch Note",
+        },
     },
 }
 ```
