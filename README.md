@@ -1,39 +1,25 @@
 # jot.nvim
 
-A Neovim plugin for seamless integration with the jot note-taking CLI.
+A Neovim plugin for seamless integration with the [JonLD/jot](https://github.com/JonLD/jot), the smart note CLI/TUI.
 
 ## Features
 
 - **Branch-based notes**: Automatically create/open notes tied to your current Git branch
-- **Smart detection**: Opens in Neovim buffer when called from within Neovim, opens in default editor otherwise
 - **Project organization**: Notes are organized by Git project and branch
 - **Configurable**: Customize keymaps, commands, and jot executable path
-- **Type-safe**: Full EmmyLua type annotations
 
 ## Installation
 
 Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 
 ```lua
-{
-  "your-username/jot.nvim",
-  config = function()
-    require("jot").setup({
-      -- Optional configuration
-      jot_cmd = "jot.exe",  -- Path to jot executable
-      keymaps = {
-        branch_note = "<leader>jn",  -- Keymap for opening branch note
-      },
-      debug = false,  -- Enable debug messages
-    })
-  end,
-}
+{ "JonLD/jot.nvim" }
 ```
 
 ## Usage
 
 ### Default Keymaps
-- `<leader>jn` - Open the note for the current Git branch (creates if doesn't exist)
+- `<leader>j` - Open the note for the current Git branch (creates if doesn't exist)
 
 ### Commands
 - `:JotBranch` - Open current branch note
@@ -42,7 +28,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 ### Programmatic Usage
 ```lua
 -- Open current branch note
-require("jot").open_branch_note()
+require("jot").branch()
 
 -- Open specific note
 require("jot").open_note("my note title")
@@ -51,24 +37,27 @@ require("jot").open_note("my note title")
 ## Configuration
 
 ```lua
-require("jot").setup({
-  -- Path to jot executable (default: "jot.exe")
-  jot_cmd = "jot",
-  
-  -- Key mappings
-  keymaps = {
-    branch_note = "<leader>jn",  -- Set to nil to disable
-  },
-  
-  -- Enable debug logging
-  debug = false,
-})
+{
+    "JonLD/jot.nvim",
+    opts = {
+        -- Optional configuration
+        jot_cmd = "jot.exe",  -- Path to jot executable
+    }
+    keys = {
+        "<leader>j",
+        function()
+            require("jot").branch()
+        end,
+        desc = "Open branch note"
+    },
+}
 ```
 
 ## Requirements
 
-- The `jot` binary must be in your PATH
-- Git repository (for branch detection)
+- jot binary, either built from source or from releases see [JonLD/jot](https://github.com/JonLD/jot)
+- The `jot` binary must be in your PATH if not specified in `jot_cmd` (see configuration)
+- Git (for branch detection)
 
 ## Architecture
 
