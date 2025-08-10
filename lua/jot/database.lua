@@ -76,11 +76,12 @@ local function execute_query(query, params)
 end
 
 ---Get note for current branch
----@param use_cwd boolean|nil If true, use CWD git context. If false/nil, use current file's git context
+---@param title string|nil Note title (optional)
+---@param project string|nil Project name (optional)
+---@param branch string|nil Branch name (optional)
 ---@return Note|nil note The note object for the current branch, or nil if error
 ---@return string|nil error Error message if operation failed
-function M.get_branch_note(use_cwd)
-    local project, branch = git.get_context(use_cwd)
+function M.get_git_note(title, project, branch)
 
     if not project then
         return nil, "Not in a Git repository or unable to determine project name"
@@ -99,7 +100,7 @@ function M.get_branch_note(use_cwd)
 
     if not notes or #notes == 0 then
         -- Note doesn't exist, we need to create it
-        return M.create_note(branch, project, branch)
+        return M.create_note(title, project, branch)
     end
 
     return notes[1], nil
@@ -119,17 +120,26 @@ function M.create_note(title, project, branch)
     end
 
     local home = vim.fn.expand("~")
-    local notes_dir = home .. "/.jot/notes/" .. project .. "/" .. branch
+    if branch == "*" then
+        -- Use project directory
+        notes_dir = home .. "/.jot/notes/" .. project
+    else
+        -- Use branch directory
+        notes_dir = home .. "/.jot/notes/" .. project .. "/" .. branch
+    end
     local path = notes_dir .. "/" .. title .. ".md"
 
     -- Create directory structure
     vim.fn.mkdir(notes_dir, "p")
 
-    -- Create the markdown file with basic content
-    local timestamp = os.date("%Y-%m-%d %H:%M:%S")
-    local content =
-        string.format("# %s\n\nCreated: %s\nProject: %s\nBranch: %s\n\n---\n\n", title, timestamp, project, branch)
-    vim.fn.writefile(vim.split(content, "\n"), path)
+    -- Only create the file if it doesn't exist
+    if vim.fn.filereadable(path) == 0 then
+        -- Create the markdown file with basic content
+        local timestamp = os.date("%Y-%m-%d %H:%M:%S")
+        local content =
+            string.format("# %s\n\nCreated: %s\nProject: %s\nBranch: %s\n\n---\n\n", title, timestamp, project, branch)
+        vim.fn.writefile(vim.split(content, "\n"), path)
+    end
 
     -- Insert into database
     local insert_query = string.format(

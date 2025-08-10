@@ -5,9 +5,27 @@ local database = require("jot.database")
 local git = require("jot.git")
 
 ---Open branch note
----@param use_cwd boolean|nil If true, use CWD context instead of current file context
-function M.open_branch_note(use_cwd)
-    local note, err = database.get_branch_note(use_cwd)
+---@param opts table|nil Options table
+--- opts.use_cwd boolean|nil If true, use CWD context instead of current file context
+function M.open_branch_note(opts)
+    opts = opts or {}
+    local project, branch = git.get_context(opts.use_cwd)
+    local note, err = database.get_git_note(branch, project, branch)
+    if err then
+        vim.notify("Error:" .. err, vim.log.levels.ERROR)
+        return
+    elseif note and note.path then
+        vim.cmd("edit " .. vim.fn.fnameescape(note.path))
+    end
+end
+
+-- Open project notes
+---@param opts table|nil Options table
+--- opts.use_cwd boolean|nil If true, use CWD context instead of current file context
+function M.open_project_note(opts)
+    opts = opts or {}
+    local project, _ = git.get_context(opts.use_cwd)
+    local note, err = database.get_git_note(project, project, "*")
     if err then
         vim.notify("Error:" .. err, vim.log.levels.ERROR)
         return
